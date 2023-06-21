@@ -1,0 +1,17 @@
+module Mux_4_nbit #(parameter n = 8)(
+    input [1:0] sel,            // 2-bit selection input
+    input [n-1:0] i0, i1, i2, i3,  // Input signals
+    output reg [n-1:0] f        // Output signal
+    );
+    
+    always @(*) begin
+        case (sel)
+            0: f = i0;          // If sel is 2'b00, assign i0 to f
+            1: f = i1;          // If sel is 2'b01, assign i1 to f
+            2: f = i2;          // If sel is 2'b10, assign i2 to f
+            3: f = i3;          // If sel is 2'b11, assign i3 to f
+            default: f = 'bx;   // Default case, assign all x to f
+        endcase
+    end
+    
+endmodule
