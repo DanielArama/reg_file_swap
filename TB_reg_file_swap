@@ -1,0 +1,49 @@
+module TB_reg_file_swap(
+
+    );
+    reg clk=1'b0, reset_n, swap, we;
+    reg [7-1:0] address_w, address_r, address_a ,address_b;
+    reg [8-1:0]  data_w;
+    wire [8-1:0]  data_r;
+    integer i;
+    
+    
+    reg_file_swap#(.addr_witdth(7),.data_width(8)) uut(
+    .clk(clk), .reset_n(reset_n), .swap(swap), .we(we),
+    .address_w(address_w), .address_r(address_r), .address_a(address_a) ,.address_b(address_b),
+    .data_w(data_w),
+    .data_r(data_r)  
+    );
+
+
+    always begin 
+    #5 clk =~clk;
+    end
+    
+    initial begin
+        reset_n=1'b0;
+        #10;
+        reset_n=1'b1;
+        swap =1'b0;
+        
+        
+        for(i=0; i<128;i=i+1) begin
+            @(negedge(clk));
+            address_w=i;
+            data_w=i;
+            we=1'b1; 
+        end
+        
+        #10; we=1'b0; 
+        
+        @(negedge(clk));
+        address_a='d22;
+        address_b='d24;
+        swap =1'b1;
+        repeat(3) @(negedge clk);
+        swap =1'b0;
+        
+        #25 $stop;
+    end
+    
+    endmodule
