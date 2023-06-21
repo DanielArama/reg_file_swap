@@ -1,0 +1,19 @@
+module reg_file #(parameter addr_width = 7, data_width = 8)
+  (
+    input clk,                  // Clock input
+    input we,                   // Write enable input
+    input [addr_width-1:0] address_w, address_r,  // Write and read address inputs
+    input [data_width-1:0] data_w,                // Data input for write operation
+    output [data_width-1:0] data_r                // Data output for read operation
+  );
+  
+  reg [data_width-1:0] memory [0:2**addr_width-1]; // Register file memory array
+
+  always @(posedge(clk)) begin
+    if (we)
+      memory[address_w] <= data_w;  // Write operation: Store data_w in memory location address_w synchronously with clock
+  end
+   
+  assign data_r = memory[address_r];  // Read operation: Assign data from memory location address_r to data_r asynchronously
+  
+endmodule
