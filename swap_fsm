@@ -1,0 +1,33 @@
+module swap_fsm(
+    input clk,
+    input swap,
+    input reset_n,
+    output [1:0] sel,
+    output w_enb
+    );
+    
+    reg [1:0] state_reg, next_reg; // Registers to store the current and next states
+    parameter s0=0, s1=1, s2=2, s3=3; // Parameter values for different states
+    
+    always@(posedge clk, negedge reset_n) begin
+        if(~reset_n) begin // Reset condition
+            state_reg <= s0; // Initialize the state_reg to s0
+        end else begin
+            state_reg <= next_reg; // Update the state_reg with the next state
+        end          
+    end
+    
+    always@(*) begin
+        case(state_reg) 
+            s0      : next_reg = (~swap)? s0 : s1; // If swap is low, stay in s0, else go to s1
+            s1      : next_reg = s2; // Move to s2 from s1
+            s2      : next_reg = s3; // Move to s3 from s2
+            s3      : next_reg = s0; // Move back to s0 from s3   
+            default : next_reg=state_reg; // Default case: maintain the current state
+        endcase
+    end
+    
+    assign sel =  (state_reg); // Output the current state
+    assign w_enb =(state_reg!=s0); // Output w_enb high when the state is not s0
+    
+endmodule
