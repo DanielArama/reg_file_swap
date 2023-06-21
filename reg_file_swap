@@ -1,0 +1,46 @@
+module reg_file_swap#(addr_witdth=7, data_width=8)(
+    input clk, reset_n, swap, we,
+    input [addr_witdth-1:0] address_w, address_r, address_a, address_b,
+    input [data_width-1:0] data_w,
+    output [data_width-1:0] data_r   
+    );
+    
+    // Declare wires and registers
+    wire [1:0] sel; // Wire to store the output of the swap_fsm module
+    wire w_enb; // Wire to store the output of the swap_fsm module
+    wire [data_width-1:0] f_out, f_in; // Wires to connect to the outputs of the Mux_4_nbit modules
+    
+    // Instantiate the swap_fsm module
+    swap_fsm Swap0 (
+        .clk(clk),
+        .swap(swap),
+        .reset_n(reset_n),
+        .sel(sel),
+        .w_enb(w_enb)
+    );
+    
+    // Instantiate the Mux_4_nbit module for selecting the read address
+    Mux_4_nbit #(.n(addr_witdth)) mux_out (
+        .sel(sel),
+        .i0(address_r), .i1(address_a), .i2(address_b), .i3(8'b0),
+        .f(f_out)
+    );
+    
+    // Instantiate the Mux_4_nbit module for selecting the write address
+    Mux_4_nbit #(.n(addr_witdth)) mux_in (
+        .sel(sel),
+        .i0(address_w), .i1(8'b0), .i2(address_a), .i3(address_b),
+        .f(f_in)
+    );
+    
+    // Instantiate the reg_file module
+    reg_file #(.addr_witdth(addr_witdth), .data_width(data_width)) regfile (
+        .clk(clk),
+        .we(w_enb ? 1'b1 : we),
+        .address_w(f_in),
+        .address_r(f_out),
+        .data_w(w_enb ? data_r : data_w),
+        .data_r(data_r)
+    );
+    
+endmodule
